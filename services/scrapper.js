@@ -25,4 +25,6 @@ const schoolarScrapper = async (keyword) => {
   }
 };
 
-module.exports = { schoolarScrapper };
+const crossRefScrapper = async () => {};
+
+module.exports = { schoolarScrapper, crossRefScrapper };
