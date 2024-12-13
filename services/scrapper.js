@@ -25,6 +25,38 @@ const schoolarScrapper = async (keyword) => {
   }
 };
 
-const crossRefScrapper = async () => {};
+const crossRefScrapper = async (keyword) => {
+  const url = new URL(
+    "https://search.crossref.org/search/works?q=metode+jurnal&from_ui=yes"
+  );
+  url.searchParams.set("q", keyword);
+
+  try {
+    const { data } = await axios.get(url);
+    const $ = cheerio.load(data);
+    const jurnalDatas = [];
+
+    $("table tr td.item-data").each((index, element) => {
+      const title = $(element)
+        .find(".lead")
+        .text()
+        .replace(/[\n\r\t]/gm, "")
+        .trim();
+      const link = $(element).find("a").attr("href");
+      const author = $(element)
+        .find(".expand")
+        .text()
+        .replace(/[\n\r\t]/gm, "")
+        .trim()
+        .replace("Authors: ", "");
+
+      if (title != "") jurnalDatas.push({ title, link, author });
+    });
+
+    return jurnalDatas;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 module.exports = { schoolarScrapper, crossRefScrapper };
