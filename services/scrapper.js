@@ -2,10 +2,11 @@ const cheerio = require("cheerio");
 const axios = require("axios");
 
 const schoolarScrapper = async (keyword) => {
-  const url = new URL(
-    "https://scholar.google.com/scholar?hl=id&as_sdt=0%2C5&q=&oq="
+  const url = createUrl(
+    "https://scholar.google.com/scholar?hl=id&as_sdt=0%2C5&q=&oq=",
+    keyword,
+    "scholar"
   );
-  url.searchParams.set("q", keyword);
   try {
     const { data } = await axios.get(url);
     const $ = cheerio.load(data);
@@ -18,45 +19,50 @@ const schoolarScrapper = async (keyword) => {
       jurnalDatas.push({ title, link, author });
     });
 
-    // console.log($.html());
     return jurnalDatas;
   } catch (error) {
     console.log(error);
   }
 };
 
-const crossRefScrapper = async (keyword) => {
-  const url = new URL(
-    "https://search.crossref.org/search/works?q=metode+jurnal&from_ui=yes"
+const semanticSholar = async (keyword) => {
+  const url = createUrl(
+    "https://api.semanticscholar.org/graph/v1/paper/search",
+    keyword,
+    "semantic"
   );
-  url.searchParams.set("q", keyword);
 
   try {
-    const { data } = await axios.get(url);
-    const $ = cheerio.load(data);
+    const {
+      data: { data },
+    } = await axios.get(url);
     const jurnalDatas = [];
-
-    $("table tr td.item-data").each((index, element) => {
-      const title = $(element)
-        .find(".lead")
-        .text()
-        .replace(/[\n\r\t]/gm, "")
-        .trim();
-      const link = $(element).find("a").attr("href");
-      const author = $(element)
-        .find(".expand")
-        .text()
-        .replace(/[\n\r\t]/gm, "")
-        .trim()
-        .replace("Authors: ", "");
-
-      if (title != "") jurnalDatas.push({ title, link, author });
+    data.forEach((element) => {
+      const title = element.title;
+      const link = `https://www.semanticscholar.org/paper/${element.paperId}`;
+      console.log(element.title);
+      jurnalDatas.push({ title, link });
     });
-
     return jurnalDatas;
   } catch (error) {
     console.log(error);
   }
 };
 
-module.exports = { schoolarScrapper, crossRefScrapper };
+const createUrl = (url, keyword, platform) => {
+  const newUrl = new URL(url);
+  const { judul, start_year, end_year } = keyword;
+  if (platform == "scholar") {
+    newUrl.searchParams.set("q", judul);
+    newUrl.searchParams.append("as_ylo", start_year);
+    newUrl.searchParams.append("as_yhi", end_year);
+  } else if (platform == "semantic") {
+    newUrl.searchParams.set("query", judul);
+    newUrl.searchParams.append("year", `${start_year}-${end_year}`);
+    newUrl.searchParams.append("limit", 100);
+  }
+
+  return newUrl;
+};
+
+module.exports = { schoolarScrapper, semanticSholar };
