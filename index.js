@@ -1,4 +1,4 @@
-const { schoolarScrapper, semanticSholar } = require("./services/scrapper.js");
+const { schoolarScrapper, semanticScholar } = require("./services/scrapper.js");
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
@@ -12,7 +12,7 @@ app.get("/", async function (req, res) {
       result = await schoolarScrapper(keyword);
       break;
     case "semantic":
-      result = await semanticSholar(keyword);
+      result = await semanticScholar(keyword);
       break;
     default:
       break;

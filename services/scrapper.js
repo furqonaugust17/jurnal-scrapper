@@ -25,7 +25,7 @@ const schoolarScrapper = async (keyword) => {
   }
 };
 
-const semanticSholar = async (keyword) => {
+const semanticScholar = async (keyword) => {
   const url = createUrl(
     "https://api.semanticscholar.org/graph/v1/paper/search",
     keyword,
@@ -65,4 +65,4 @@ const createUrl = (url, keyword, platform) => {
   return newUrl;
 };
 
-module.exports = { schoolarScrapper, semanticSholar };
+module.exports = { schoolarScrapper, semanticScholar };
